@@ -111,6 +111,22 @@ namespace Probability
 
         private static void Build()
         {
+            // Creating a window with the same id closes the previous one, which fires
+            // its OnClose callback. Keep the flag set for the whole rebuild so that
+            // callback does not clear the active filter.
+            rebuilding = true;
+            try
+            {
+                BuildCore();
+            }
+            finally
+            {
+                rebuilding = false;
+            }
+        }
+
+        private static void BuildCore()
+        {
             List<GameItemElement> items = ItemFilter.ScanVisibleItems();
             Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
 
@@ -177,15 +193,7 @@ namespace Probability
             builder.AddSeparator();
             builder.AddCloseButton(Close, "filter_close");
 
-            rebuilding = true;
-            try
-            {
-                window = builder.Show();
-            }
-            finally
-            {
-                rebuilding = false;
-            }
+            window = builder.Show();
             if (window != null)
             {
                 window.SetTitle(Labels.Get("ui_title", "Item Category Filter"));
