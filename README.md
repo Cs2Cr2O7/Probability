@@ -53,12 +53,13 @@ post-build copy step; each project only declares its assembly references.
 |---|---|
 | `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `manifest.xml`, `Localization\`) |
 | `src\Directory.Build.props` | shared build settings + install-to-Mods step |
-| `docs\` | notes on the modding environment and this mod's design |
+
+Maintenance notes (feature acceptance, architecture, decisions, history) are kept in the local
+workspace and are not published in this repository.
 
 ## Status
 
-Compiles against game version 1.0.0.x; **not yet verified in a running game**. Test checklist is
-in [docs/01-Probability.md](docs/01-Probability.md).
+Compiles against game version 1.0.0.x; **not yet verified in a running game**.
 
 ## Credits
 

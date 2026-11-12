@@ -1,3 +1,9 @@
+# local maintenance docs (see docs/LOCAL_MAINTENANCE.md)
+/AGENTS.md
+/HANDOFF.md
+/PROGRESS.md
+/docs/
+
 # build output
 bin/
 obj/
