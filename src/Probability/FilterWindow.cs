@@ -148,7 +148,7 @@ namespace Probability
 
             int columns = 4;
             int rows = Math.Max(1, (counts.Count + columns - 1) / columns);
-            float height = Math.Min(760f, 170f + rows * 40f);
+            float height = Math.Min(760f, 210f + rows * 40f);
 
             builder.SetSize(560f, height);
             builder.SetDraggable(true);
