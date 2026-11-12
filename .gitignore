@@ -1,0 +1,16 @@
+# build output
+bin/
+obj/
+
+# local staged install / deploy output
+build/
+
+# reference material (cloned docs + decompiled game code) — not redistributable
+ds-modding-docs/
+ref/
+
+# editor / OS noise
+.vs/
+.idea/
+*.user
+Thumbs.db

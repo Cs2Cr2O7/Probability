@@ -1,0 +1,57 @@
+ui_title,Item Category Filter
+ui_total,{0} items in view
+ui_all,Show all
+ui_empty,No items in view - open the inventory or a container first
+ui_close,Close
+cat_unclassified,Unclassified
+cat_access_card,Access Card
+cat_alarm_module,Alarm Module
+cat_alcohol,Alcohol
+cat_ammunition,Ammunition
+cat_armor,Armor
+cat_art,Art
+cat_basic_material,Basic Material
+cat_brevage,Beverage
+cat_chemical_supplies,Chemical Supplies
+cat_contraband,Contraband
+cat_document,Document
+cat_energy_cell,Energy Cell
+cat_evaporator_module,Evaporator Module
+cat_farming_supplies,Farming Supplies
+cat_filter,Filter
+cat_firearm,Firearm
+cat_food,Food
+cat_gun_mod,Gun Mod
+cat_household_good,Household Good
+cat_hydroponic_module,Hydroponic Module
+cat_junk,Junk
+cat_lottery,Lottery
+cat_lowtech,Low Tech
+cat_luxury_item,Luxury Item
+cat_machine,Machine
+cat_makeshift,Makeshift
+cat_material,Material
+cat_medical,Medical
+cat_medical_tool,Medical Tool
+cat_melee_weapon,Melee Weapon
+cat_midline,Midline
+cat_moddable,Moddable
+cat_modified_seed,Modified Seed
+cat_module,Module
+cat_munition,Munition
+cat_narcotic,Narcotic
+cat_node,Node
+cat_organ,Organ
+cat_poison,Poison
+cat_printer_module,Printer Module
+cat_processed_food,Processed Food
+cat_seed,Seed
+cat_storage,Storage
+cat_substance,Substance
+cat_supply_crate,Supply Crate
+cat_tool,Tool
+cat_treat,Treat
+cat_water,Water
+cat_water_purification_supply,Water Purification Supply
+cat_water_ration,Water Ration
+cat_weapon,Weapon

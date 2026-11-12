@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Manifest>
+  <ID>probability</ID>
+  <Name>Probability</Name>
+  <Author>Cs2Cr2O7</Author>
+  <ModVersion>0.1.0</ModVersion>
+  <Description>Adds an item category filter that highlights matching items in the inventory and in open containers.</Description>
+  <GameVersions>
+    <Version>1.0.0</Version>
+  </GameVersions>
+  <Prerequisites />
+  <Assemblies>
+    <Assembly>Probability.dll</Assembly>
+  </Assemblies>
+  <Capabilities />
+</Manifest>

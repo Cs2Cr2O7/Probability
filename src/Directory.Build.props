@@ -1,0 +1,41 @@
+<Project>
+
+  <!--
+    Shared build settings for every mod project under src\.
+    Game location can be overridden without editing any file:
+      -p:GameDir="D:\path\to\Probably Stolen"   (or set the PROBABLY_STOLEN_DIR env var)
+  -->
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == '' and '$(PROBABLY_STOLEN_DIR)' != ''">$(PROBABLY_STOLEN_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">D:\Steam\steamapps\common\Probably Stolen</GameDir>
+    <ManagedDir>$(GameDir)\Probably Stolen_Data\Managed</ManagedDir>
+
+    <!-- Where the built mod is installed. Default: the game's Mods\<Project> folder. -->
+    <ModInstallDir Condition="'$(ModInstallDir)' == ''">$(GameDir)\Mods\$(MSBuildProjectName)</ModInstallDir>
+
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Files the loader reads next to the DLL. Missing folders are simply empty. -->
+  <ItemGroup>
+    <ModFile Include="manifest.xml" />
+    <ModFile Include="preview.png" Condition="Exists('preview.png')" />
+    <ModFile Include="Textures\**\*" />
+    <ModFile Include="Sounds\**\*" />
+    <ModFile Include="Localization\**\*" />
+    <ModFile Include="LootTables\**\*" />
+    <ModFile Include="Books\**\*" />
+  </ItemGroup>
+
+  <!-- After every build, copy the DLL and the data files into ModInstallDir. -->
+  <Target Name="InstallMod" AfterTargets="Build" Condition="'$(DisableModInstall)' != 'true'">
+    <Message Importance="high" Text="InstallMod: $(TargetPath) -> $(ModInstallDir)" />
+    <MakeDir Directories="$(ModInstallDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModInstallDir)" />
+    <Copy SourceFiles="@(ModFile)"
+          DestinationFiles="@(ModFile->'$(ModInstallDir)\%(Identity)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
