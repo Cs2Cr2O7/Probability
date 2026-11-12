@@ -16,6 +16,7 @@ namespace Probability
         private static CustomUIWindow window;
         private static Vector2? lastPosition;
         private static bool rebuilding;
+        private static Dictionary<string, int> lastCounts = new Dictionary<string, int>();
 
         internal static bool IsOpen
         {
@@ -82,6 +83,7 @@ namespace Probability
             }
             try
             {
+                RememberPosition();
                 ItemFilter.ClearSelection();
             }
             catch (Exception e)
@@ -89,6 +91,21 @@ namespace Probability
                 ModEntry.Log.Error("OnWindowClosed failed: " + e.Message);
             }
             window = null;
+        }
+
+        private static void RememberPosition()
+        {
+            try
+            {
+                if (window != null && window.IsAlive && window.Rect != null)
+                {
+                    lastPosition = window.Rect.anchoredPosition;
+                }
+            }
+            catch
+            {
+                // a dead window has nothing to remember
+            }
         }
 
         private static void Select(string type)
@@ -104,12 +121,55 @@ namespace Probability
                 {
                     ItemFilter.Select(type);
                 }
-                Build();
+
+                // Update the existing buttons instead of rebuilding the window:
+                // rebuilding closes/recreates it, which moves it and flickers.
+                if (window != null && window.IsVisible)
+                {
+                    UpdateLabels();
+                }
+                else
+                {
+                    Build();
+                }
             }
             catch (Exception e)
             {
                 ModEntry.Log.Error("Select failed: " + e);
             }
+        }
+
+        /// <summary>Re-renders the selection marker on the existing buttons.</summary>
+        private static void UpdateLabels()
+        {
+            try
+            {
+                CustomUIElement all = window.Get("filter_all");
+                if (all != null && all.text != null)
+                {
+                    all.text.text = Labels.Get("ui_all", "Show all");
+                }
+
+                foreach (KeyValuePair<string, int> entry in lastCounts)
+                {
+                    CustomUIElement element = window.Get("filter_" + entry.Key);
+                    if (element == null || element.text == null)
+                    {
+                        continue;
+                    }
+                    element.text.text = Label(entry.Key, entry.Value);
+                }
+            }
+            catch (Exception e)
+            {
+                ModEntry.Log.Error("UpdateLabels failed: " + e.Message);
+            }
+        }
+
+        private static string Label(string type, int count)
+        {
+            bool selected = ItemFilter.SelectedType == type;
+            return (selected ? "> " : string.Empty) + Labels.Category(type) + " (" + count + ")";
         }
 
         private static void Build()
@@ -132,12 +192,10 @@ namespace Probability
         {
             List<GameItemElement> items = ItemFilter.ScanVisibleItems();
             Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
+            lastCounts = counts;
 
             // Keep the window where the player dragged it across rebuilds.
-            if (window != null && window.IsAlive && window.Rect != null)
-            {
-                lastPosition = window.Rect.anchoredPosition;
-            }
+            RememberPosition();
 
             CustomUIBuilder builder = CustomUIManager.Window(
                 WindowId,
@@ -185,10 +243,7 @@ namespace Probability
                 foreach (KeyValuePair<string, int> entry in OrderCategories(counts))
                 {
                     string type = entry.Key;
-                    bool selected = ItemFilter.SelectedType == type;
-                    string label = (selected ? "> " : string.Empty)
-                        + Labels.Category(type) + " (" + entry.Value + ")";
-                    builder.AddButton(label, () => Select(type), "filter_" + type);
+                    builder.AddButton(Label(type, entry.Value), () => Select(type), "filter_" + type);
                 }
                 builder.End();
             }
