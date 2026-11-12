@@ -36,9 +36,11 @@ namespace Probability
         {
             if (window != null && window.IsVisible)
             {
+                ModEntry.Log.Log("closing the filter window.");
                 Close();
                 return;
             }
+            ModEntry.Log.Log("opening the filter window.");
             Open();
         }
 
@@ -93,6 +95,7 @@ namespace Probability
         {
             try
             {
+                ModEntry.Log.Log("filter = " + (type ?? "(all)"));
                 if (type == null)
                 {
                     ItemFilter.ClearSelection();
@@ -197,6 +200,13 @@ namespace Probability
             if (window != null)
             {
                 window.SetTitle(Labels.Get("ui_title", "Item Category Filter"));
+                string position = window.Rect != null ? window.Rect.anchoredPosition.ToString() : "?";
+                ModEntry.Log.Log("window built: " + items.Count + " item(s), " + counts.Count
+                    + " category(ies), visible=" + window.IsVisible + ", pos=" + position);
+            }
+            else
+            {
+                ModEntry.Log.Error("window could not be shown.");
             }
         }
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 namespace Probability
@@ -15,7 +14,7 @@ namespace Probability
 
         internal static ModLog Log;
 
-        private Coroutine hotkeyLoop;
+        private GameObject hostObject;
 
         public void Init(ModManifest manifest)
         {
@@ -28,7 +27,15 @@ namespace Probability
             try
             {
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: item category filter", FilterWindow.Toggle, tall: true);
-                hotkeyLoop = ModHelper.StartCoroutine(ModId, PollHotkey());
+
+                if (hostObject != null)
+                {
+                    UnityEngine.Object.Destroy(hostObject);
+                }
+                hostObject = new GameObject("Probability.HotkeyHost");
+                UnityEngine.Object.DontDestroyOnLoad(hostObject);
+                hostObject.AddComponent<HotkeyHost>();
+
                 Log.Log("enabled. Press F7 (or the F9 debug button) to open the category filter.");
             }
             catch (Exception e)
@@ -41,13 +48,14 @@ namespace Probability
         {
             try
             {
-                if (hotkeyLoop != null)
-                {
-                    ModHelper.StopCoroutine(ModId, hotkeyLoop);
-                    hotkeyLoop = null;
-                }
                 ModHelper.RemoveDebugFunctions(ModId);
                 FilterWindow.Close();
+
+                if (hostObject != null)
+                {
+                    UnityEngine.Object.Destroy(hostObject);
+                    hostObject = null;
+                }
                 Log.Log("disabled.");
             }
             catch (Exception e)
@@ -56,36 +64,30 @@ namespace Probability
             }
         }
 
-        private IEnumerator PollHotkey()
+        /// <summary>Called every frame by <see cref="HotkeyHost"/>.</summary>
+        internal static void Tick()
         {
-            while (true)
+            if (Input.GetKeyDown(KeyCode.F7))
             {
-                try
-                {
-                    if (Input.GetKeyDown(KeyCode.F7))
-                    {
-                        FilterWindow.Toggle();
-                    }
-                    else if (ItemFilter.IsActive)
-                    {
-                        if (!FilterWindow.IsOpen)
-                        {
-                            // The window went away with its scene (save loaded, scene switch).
-                            ItemFilter.ClearSelection();
-                        }
-                        else if (Time.frameCount % 30 == 0)
-                        {
-                            // Re-apply the dimming so items that appeared after the last
-                            // pass (opened container, moved item) follow the filter too.
-                            ItemFilter.Apply();
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.Error("hotkey loop: " + e);
-                }
-                yield return null;
+                FilterWindow.Toggle();
+                return;
+            }
+
+            if (!ItemFilter.IsActive)
+            {
+                return;
+            }
+
+            if (!FilterWindow.IsOpen)
+            {
+                // The window went away with its scene (save loaded, scene switch).
+                ItemFilter.ClearSelection();
+            }
+            else if (Time.frameCount % 30 == 0)
+            {
+                // Re-apply the dimming so items that appeared after the last
+                // pass (opened container, moved item) follow the filter too.
+                ItemFilter.Apply();
             }
         }
     }
