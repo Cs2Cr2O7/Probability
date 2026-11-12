@@ -1,5 +1,5 @@
 ui_title,物品类别筛选器
-ui_total,已扫描物品
+ui_total,屏幕内 {0} 件物品
 ui_all,显示全部
 ui_empty,没有可见物品 - 请先打开背包或容器
 ui_close,关闭
