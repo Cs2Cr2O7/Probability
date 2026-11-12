@@ -85,11 +85,14 @@ namespace Probability
             }
             else if (Time.frameCount % 30 == 0)
             {
-                // Re-apply the dimming so items that appeared after the last
-                // pass (opened container, moved item) follow the filter too,
-                // and keep the category counts on the buttons up to date.
+                // Re-apply the dimming so items that appeared after the last pass
+                // (opened container, moved item) follow the filter too. The container
+                // index is rebuilt only every ~2 seconds because it walks every stored item.
                 ItemFilter.Apply();
-                FilterWindow.RefreshCounts();
+                if (Time.frameCount % 120 == 0)
+                {
+                    FilterWindow.RefreshCounts();
+                }
             }
         }
     }

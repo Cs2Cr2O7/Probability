@@ -158,7 +158,7 @@ namespace Probability
                 CustomUIElement header = window.Get("filter_total");
                 if (header != null)
                 {
-                    header.SetText(Labels.Get("ui_total", "Items in view") + ": " + currentTotal);
+                    header.SetText(Labels.Get("ui_total", "Items scanned") + ": " + currentTotal);
                 }
 
                 foreach (string type in shownTypes)
@@ -203,8 +203,9 @@ namespace Probability
             }
             try
             {
-                List<GameItemElement> items = ItemFilter.ScanVisibleItems();
-                Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
+                ItemFilter.Rescan();
+                Dictionary<string, int> counts = ItemFilter.Counts;
+                int total = ItemFilter.Total;
 
                 bool hasUnshown = false;
                 foreach (string type in counts.Keys)
@@ -251,8 +252,9 @@ namespace Probability
 
         private static void BuildCore()
         {
-            List<GameItemElement> items = ItemFilter.ScanVisibleItems();
-            Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
+            ItemFilter.Rescan(force: true);
+            Dictionary<string, int> counts = ItemFilter.Counts;
+            int total = ItemFilter.Total;
             currentCounts = counts;
             currentTotal = total;
             setChangeLogged = false;
@@ -290,7 +292,7 @@ namespace Probability
                 builder.Center();
             }
 
-            builder.AddHeader(Labels.Get("ui_total", "Items in view") + ": " + total, "filter_total");
+            builder.AddHeader(Labels.Get("ui_total", "Items scanned") + ": " + total, "filter_total");
 
             builder.AddButton(
                 Labels.Get("ui_all", "Show all"),
@@ -315,7 +317,7 @@ namespace Probability
             {
                 window.SetTitle(Labels.Get("ui_title", "Item Category Filter"));
                 string position = window.Rect != null ? window.Rect.anchoredPosition.ToString() : "?";
-                ModEntry.Log.Log("window built: " + items.Count + " item(s), " + categories.Count
+                ModEntry.Log.Log("window built: " + total + " item(s) scanned, " + categories.Count
                     + " category(ies), " + counts.Count + " with items, visible=" + window.IsVisible
                     + ", pos=" + position);
             }
