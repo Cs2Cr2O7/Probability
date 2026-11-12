@@ -30,7 +30,6 @@ namespace Probability
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 超级魅惑香水", CharmPerfumeDirectory.GiveToPlayer, tall: true);
 
                 CharmPerfumeDirectory.EnsureRegistered();
-                CharmPatches.Apply();
 
                 if (hostObject != null)
                 {
@@ -54,7 +53,6 @@ namespace Probability
             {
                 ModHelper.RemoveDebugFunctions(ModId);
                 FilterWindow.Close();
-                CharmPatches.Remove();
                 CharmEffect.Clear();
 
                 if (hostObject != null)

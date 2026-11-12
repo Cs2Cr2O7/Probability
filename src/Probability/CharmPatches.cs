@@ -1,57 +1,19 @@
 using System;
-using System.Reflection;
 using HarmonyLib;
 
 namespace Probability
 {
     /// <summary>
-    /// Harmony patches behind the "Super Charm Perfume" effect: while the buff is active for the
-    /// current customer, bargain attempts cannot fail, reputation cannot drop and fake/forged
+    /// Harmony patch classes for the "Super Charm Perfume" effect: while the buff is active for
+    /// the current customer, bargain attempts cannot fail, reputation cannot drop and forged
     /// item features are not exposed.
+    /// <para>
+    /// Do NOT create a Harmony instance here: <c>ModLoader.LoadModDll</c> runs
+    /// <c>harmony.PatchAll(assembly)</c> with its own instance ("mod.&lt;id&gt;") before
+    /// <c>Init</c>/<c>OnEnable</c>, and unpatches the same instance when the mod is disabled.
+    /// Patching again from the mod would apply every patch twice.
+    /// </para>
     /// </summary>
-    internal static class CharmPatches
-    {
-        private const string HarmonyId = "probability.charm";
-
-        private static Harmony harmony;
-
-        internal static void Apply()
-        {
-            if (harmony != null)
-            {
-                return;
-            }
-            try
-            {
-                harmony = new Harmony(HarmonyId);
-                harmony.PatchAll(Assembly.GetExecutingAssembly());
-                ModEntry.Log.Log("charm patches applied.");
-            }
-            catch (Exception e)
-            {
-                harmony = null;
-                ModEntry.Log.Error("charm patches failed: " + e);
-            }
-        }
-
-        internal static void Remove()
-        {
-            if (harmony == null)
-            {
-                return;
-            }
-            try
-            {
-                harmony.UnpatchAll(HarmonyId);
-            }
-            catch (Exception e)
-            {
-                ModEntry.Log.Error("charm unpatch failed: " + e.Message);
-            }
-            harmony = null;
-        }
-    }
-
     // ---------------------------------------------------------------- bargain success chance
 
     /// <summary>Faction reputation bonus used by markup / buying-discount rolls.</summary>
@@ -100,9 +62,6 @@ namespace Probability
     /// </summary>
     internal static class CharmClientSupport
     {
-        private static readonly AccessTools.FieldRef<BargainUIManager, StoreClient> TrackedClient =
-            AccessTools.FieldRefAccess<BargainUIManager, StoreClient>("trackedClient");
-
         internal static void Neutralize(BargainUIManager manager)
         {
             if (!CharmEffect.IsActive || manager == null)
@@ -111,7 +70,8 @@ namespace Probability
             }
             try
             {
-                StoreClient client = TrackedClient(manager);
+                var field = AccessTools.Field(typeof(BargainUIManager), "trackedClient");
+                var client = field != null ? field.GetValue(manager) as StoreClient : null;
                 if (client == null)
                 {
                     return;
@@ -156,6 +116,7 @@ namespace Probability
 
     // ---------------------------------------------------------------- reputation loss
 
+    /// <summary>Static helper: StoreReputation.ModReputation(string factionId, int value, bool notify).</summary>
     [HarmonyPatch(typeof(StoreReputation), "ModReputation", new[] { typeof(string), typeof(int), typeof(bool) })]
     internal static class PatchReputationLossFaction
     {
@@ -165,12 +126,13 @@ namespace Probability
         }
     }
 
+    /// <summary>Instance helper: StoreReputation.ModReputation(double modValue).</summary>
     [HarmonyPatch(typeof(StoreReputation), "ModReputation", new[] { typeof(double) })]
     internal static class PatchReputationLossInstance
     {
-        private static bool Prefix(double __1)
+        private static bool Prefix(double __0)
         {
-            return !(CharmEffect.IsActive && __1 < 0.0);
+            return !(CharmEffect.IsActive && __0 < 0.0);
         }
     }
 
