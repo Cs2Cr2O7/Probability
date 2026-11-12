@@ -1,12 +1,26 @@
 # Probability — item category filter for Probably Stolen
 
 A mod for [Probably Stolen](https://store.steampowered.com/) that adds a category filter for
-items in the inventory and in open containers.
+items in the inventory and in open containers, plus one custom item: the **Super Charm Perfume**.
+
+## Item category filter
 
 Open the inventory or a container, press **F7** (or use the *Probability: item category filter*
 button in the F9 dev menu), pick a category — every item that does not carry that category is
 dimmed, the matching ones stay readable, so you can find "all the medical stuff" or "all the
 firearms" at a glance.
+
+## Super Charm Perfume
+
+A custom consumable ("有效成分提取自魅魔分泌物" / *active ingredient extracted from succubus
+secretions*). Spray it while a customer is at the counter: for that customer, barganing always
+succeeds no matter how steep the multiplier is, reputation never drops, and forged item labels
+are not exposed.
+
+* The item is registered through the game's own item directory, so it saves and loads like a
+  normal item.
+* Effects are applied with a few Harmony patches and end when that customer leaves.
+* For now it is handed out through the dev menu: **F9 → Modding → Probability: give 超级魅惑香水**.
 
 ## How it works
 
@@ -51,7 +65,7 @@ post-build copy step; each project only declares its assembly references.
 
 | Path | Contents |
 |---|---|
-| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `manifest.xml`, `Localization\`) |
+| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `CharmPerfume.cs`, `CharmEffect.cs`, `CharmPatches.cs`, `manifest.xml`, `Localization\`) |
 | `src\Directory.Build.props` | shared build settings + install-to-Mods step |
 
 Maintenance notes (feature acceptance, architecture, decisions, history) are kept in the local
@@ -59,7 +73,8 @@ workspace and are not published in this repository.
 
 ## Status
 
-Compiles against game version 1.0.0.x; **not yet verified in a running game**.
+Compiles against game version 1.0.0.x; the filter is verified in a running game. The charm
+perfume item is implemented but has not been verified in a live save yet.
 
 ## Credits
 
