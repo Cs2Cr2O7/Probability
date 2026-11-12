@@ -1,5 +1,5 @@
 ui_title,Item Category Filter
-ui_total,{0} items in view
+ui_total,Items in view
 ui_all,Show all
 ui_empty,No items in view - open the inventory or a container first
 ui_close,Close
