@@ -14,6 +14,23 @@ namespace Probability
         internal const string Unclassified = "__UNCLASSIFIED__";
         internal const float DimAlpha = 0.25f;
 
+        /// <summary>
+        /// Every type the game actually assigns to items (collected from the SetGameItemType
+        /// calls in the game's item directories). The filter always offers all of them, even
+        /// when nothing visible carries the type, so the category list never looks incomplete.
+        /// </summary>
+        internal static readonly string[] AllTypes =
+        {
+            "FOOD", "MEDICAL", "MATERIAL", "HOUSEHOLD_GOOD", "SUBSTANCE", "WEAPON", "WATER", "ARMOR",
+            "TOOL", "MODULE", "AMMUNITION", "BREVAGE", "ALCOHOL", "WATER_RATION", "WATER_PURIFICATION_SUPPLY",
+            "SEED", "MODIFIED_SEED", "FARMING_SUPPLIES", "CHEMICAL_SUPPLIES", "PROCESSED_FOOD", "TREAT",
+            "BASIC_MATERIAL", "ENERGY_CELL", "NARCOTIC", "POISON", "FILTER", "STORAGE", "CONTRABAND",
+            "ACCESS_CARD", "DOCUMENT", "JUNK", "LUXURY_ITEM", "ART", "LOTTERY", "MACHINE", "MAKESHIFT",
+            "MIDLINE", "LOWTECH", "MELEE_WEAPON", "FIREARM", "GUN_MOD", "MUNITION", "MODDABLE",
+            "HYDROPONIC_MODULE", "ALARM_MODULE", "PRINTER_MODULE", "EVAPORATOR_MODULE", "NODE", "ORGAN",
+            "SUPPLY_CRATE", "MEDICAL_TOOL",
+        };
+
         /// <summary>Currently selected item type, or null when the filter is off.</summary>
         internal static string SelectedType { get; private set; }
 
@@ -131,15 +148,14 @@ namespace Probability
             try
             {
                 List<string> raw = item.GetGameItemType();
-                if (raw == null)
+                if (raw != null)
                 {
-                    return types;
-                }
-                foreach (string type in raw)
-                {
-                    if (!string.IsNullOrEmpty(type) && !types.Contains(type))
+                    foreach (string type in raw)
                     {
-                        types.Add(type);
+                        if (!string.IsNullOrEmpty(type) && !types.Contains(type))
+                        {
+                            types.Add(type);
+                        }
                     }
                 }
             }
@@ -147,7 +163,65 @@ namespace Probability
             {
                 ModEntry.Log.Error("GetGameItemType failed for " + SafeName(item) + ": " + e.Message);
             }
+
+            AddLiquidTypes(item, types);
             return types;
+        }
+
+        /// <summary>
+        /// Liquid containers (water/beer bottles, chemical bottles) carry no item type for
+        /// their contents — the liquid lives in tags. Without this, "水"/"酒精" would never
+        /// match the bottles the player is actually looking at.
+        /// </summary>
+        private static void AddLiquidTypes(GameItemElement item, List<string> types)
+        {
+            try
+            {
+                if (!item.IsTag("LIQUID_CONTAINER_TAG"))
+                {
+                    return;
+                }
+                int[] parts = WaterHelper.GetLiquidParts(item);
+                if (parts == null)
+                {
+                    return;
+                }
+                int count = Math.Min(parts.Length, Liquid.Liquids.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    if (parts[i] <= 0)
+                    {
+                        continue;
+                    }
+                    string liquidId = Liquid.Liquids[i].identifier;
+                    if (liquidId == "water")
+                    {
+                        AddType(types, "WATER");
+                    }
+                    else if (liquidId == "alcohol")
+                    {
+                        AddType(types, "ALCOHOL");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                if (!liquidReadWarned)
+                {
+                    liquidReadWarned = true;
+                    ModEntry.Log.Error("liquid content read failed, bottles may not match WATER/ALCOHOL: " + e.Message);
+                }
+            }
+        }
+
+        private static bool liquidReadWarned;
+
+        private static void AddType(List<string> types, string type)
+        {
+            if (!types.Contains(type))
+            {
+                types.Add(type);
+            }
         }
 
         internal static string SafeName(GameItemElement item)

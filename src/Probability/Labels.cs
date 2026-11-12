@@ -71,5 +71,15 @@ namespace Probability
             }
             return builder.ToString();
         }
+
+        /// <summary>Keeps a button label short enough for the fixed-width grid cells.</summary>
+        internal static string Shorten(string text, int max)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= max)
+            {
+                return text;
+            }
+            return text.Substring(0, max - 1).TrimEnd() + "…";
+        }
     }
 }

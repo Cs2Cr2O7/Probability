@@ -185,7 +185,8 @@ namespace Probability
         private static string Label(string type, int count)
         {
             bool selected = ItemFilter.SelectedType == type;
-            return (selected ? "> " : string.Empty) + Labels.Category(type) + " (" + count + ")";
+            string name = Labels.Shorten(Labels.Category(type), 14);
+            return (selected ? "> " : string.Empty) + name + " (" + count + ")";
         }
 
         /// <summary>
@@ -205,16 +206,13 @@ namespace Probability
                 List<GameItemElement> items = ItemFilter.ScanVisibleItems();
                 Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
 
-                bool sameSet = counts.Count == shownTypes.Count;
-                if (sameSet)
+                bool hasUnshown = false;
+                foreach (string type in counts.Keys)
                 {
-                    foreach (string type in shownTypes)
+                    if (!shownTypes.Contains(type))
                     {
-                        if (!counts.ContainsKey(type))
-                        {
-                            sameSet = false;
-                            break;
-                        }
+                        hasUnshown = true;
+                        break;
                     }
                 }
 
@@ -222,12 +220,11 @@ namespace Probability
                 currentTotal = total;
                 UpdateLabels();
 
-                if (!sameSet && !setChangeLogged)
+                if (hasUnshown && !setChangeLogged)
                 {
                     setChangeLogged = true;
-                    ModEntry.Log.Log("item categories changed while the window was open ("
-                        + counts.Count + " now, " + shownTypes.Count
-                        + " shown); the new ones appear after reopening the window.");
+                    ModEntry.Log.Log("a type outside the known list appeared ("
+                        + counts.Count + " total); it shows up after reopening the window.");
                 }
             }
             catch (Exception e)
@@ -274,9 +271,11 @@ namespace Probability
                 return;
             }
 
-            int columns = 4;
-            int rows = Math.Max(1, (counts.Count + columns - 1) / columns);
-            float height = Math.Min(760f, 210f + rows * 40f);
+            List<string> categories = BuildCategoryList(counts);
+
+            int columns = 5;
+            int rows = Math.Max(1, (categories.Count + columns - 1) / columns);
+            float height = Math.Min(900f, 210f + rows * 40f);
 
             builder.SetSize(560f, height);
             builder.SetDraggable(true);
@@ -300,21 +299,13 @@ namespace Probability
 
             builder.AddSeparator();
 
-            if (counts.Count == 0)
+            builder.BeginGrid(columns, 104f, 32f, 5f);
+            foreach (string type in categories)
             {
-                builder.AddLabel(Labels.Get("ui_empty", "No items in view. Open a container or the inventory first."));
+                shownTypes.Add(type);
+                builder.AddButton(Label(type, CountOf(type)), () => Select(type), "filter_" + type);
             }
-            else
-            {
-                builder.BeginGrid(columns, 126f, 34f, 6f);
-                foreach (KeyValuePair<string, int> entry in OrderCategories(counts))
-                {
-                    string type = entry.Key;
-                    shownTypes.Add(type);
-                    builder.AddButton(Label(type, entry.Value), () => Select(type), "filter_" + type);
-                }
-                builder.End();
-            }
+            builder.End();
 
             builder.AddSeparator();
             builder.AddCloseButton(Close, "filter_close");
@@ -324,8 +315,9 @@ namespace Probability
             {
                 window.SetTitle(Labels.Get("ui_title", "Item Category Filter"));
                 string position = window.Rect != null ? window.Rect.anchoredPosition.ToString() : "?";
-                ModEntry.Log.Log("window built: " + items.Count + " item(s), " + counts.Count
-                    + " category(ies), visible=" + window.IsVisible + ", pos=" + position);
+                ModEntry.Log.Log("window built: " + items.Count + " item(s), " + categories.Count
+                    + " category(ies), " + counts.Count + " with items, visible=" + window.IsVisible
+                    + ", pos=" + position);
             }
             else
             {
@@ -333,13 +325,25 @@ namespace Probability
             }
         }
 
-        /// <summary>Game "major" categories first, then the rest by how many items carry them.</summary>
-        private static IEnumerable<KeyValuePair<string, int>> OrderCategories(Dictionary<string, int> counts)
+        /// <summary>All known types; categories that currently have items come first.</summary>
+        private static List<string> BuildCategoryList(Dictionary<string, int> counts)
         {
-            return counts
-                .OrderBy(pair => CategoryRank(pair.Key))
-                .ThenByDescending(pair => pair.Value)
-                .ThenBy(pair => pair.Key, StringComparer.Ordinal);
+            var all = new List<string>(ItemFilter.AllTypes);
+            foreach (string type in counts.Keys)
+            {
+                if (type != ItemFilter.Unclassified && !all.Contains(type))
+                {
+                    all.Add(type);
+                }
+            }
+            all.Add(ItemFilter.Unclassified);
+
+            return all
+                .OrderBy(type => CountOf(type) > 0 ? 0 : 1)
+                .ThenBy(CategoryRank)
+                .ThenByDescending(CountOf)
+                .ThenBy(type => type, StringComparer.Ordinal)
+                .ToList();
         }
 
         private static int CategoryRank(string type)
