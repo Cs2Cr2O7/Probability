@@ -16,7 +16,12 @@ namespace Probability
         private static CustomUIWindow window;
         private static Vector2? lastPosition;
         private static bool rebuilding;
-        private static Dictionary<string, int> lastCounts = new Dictionary<string, int>();
+
+        /// <summary>Categories that currently have a button, in display order.</summary>
+        private static List<string> shownTypes = new List<string>();
+        private static Dictionary<string, int> currentCounts = new Dictionary<string, int>();
+        private static int currentTotal;
+        private static bool setChangeLogged;
 
         internal static bool IsOpen
         {
@@ -139,25 +144,31 @@ namespace Probability
             }
         }
 
-        /// <summary>Re-renders the selection marker on the existing buttons.</summary>
+        /// <summary>Re-renders the counts and the selection marker on the existing buttons.</summary>
         private static void UpdateLabels()
         {
             try
             {
                 CustomUIElement all = window.Get("filter_all");
-                if (all != null && all.text != null)
+                if (all != null)
                 {
-                    all.text.text = Labels.Get("ui_all", "Show all");
+                    all.SetText(Labels.Get("ui_all", "Show all"));
                 }
 
-                foreach (KeyValuePair<string, int> entry in lastCounts)
+                CustomUIElement header = window.Get("filter_total");
+                if (header != null)
                 {
-                    CustomUIElement element = window.Get("filter_" + entry.Key);
-                    if (element == null || element.text == null)
+                    header.SetText(Labels.Get("ui_total", "Items in view") + ": " + currentTotal);
+                }
+
+                foreach (string type in shownTypes)
+                {
+                    CustomUIElement element = window.Get("filter_" + type);
+                    if (element == null)
                     {
                         continue;
                     }
-                    element.text.text = Label(entry.Key, entry.Value);
+                    element.SetText(Label(type, CountOf(type)));
                 }
             }
             catch (Exception e)
@@ -166,10 +177,63 @@ namespace Probability
             }
         }
 
+        private static int CountOf(string type)
+        {
+            return currentCounts.TryGetValue(type, out int count) ? count : 0;
+        }
+
         private static string Label(string type, int count)
         {
             bool selected = ItemFilter.SelectedType == type;
             return (selected ? "> " : string.Empty) + Labels.Category(type) + " (" + count + ")";
+        }
+
+        /// <summary>
+        /// Picks up item changes while the window stays open (a container was opened/closed,
+        /// an item was moved). Existing buttons are re-labelled in place; categories that did
+        /// not exist when the window was built only appear after reopening it, because adding
+        /// buttons would have to resize the whole window.
+        /// </summary>
+        internal static void RefreshCounts()
+        {
+            if (window == null || !window.IsVisible)
+            {
+                return;
+            }
+            try
+            {
+                List<GameItemElement> items = ItemFilter.ScanVisibleItems();
+                Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
+
+                bool sameSet = counts.Count == shownTypes.Count;
+                if (sameSet)
+                {
+                    foreach (string type in shownTypes)
+                    {
+                        if (!counts.ContainsKey(type))
+                        {
+                            sameSet = false;
+                            break;
+                        }
+                    }
+                }
+
+                currentCounts = counts;
+                currentTotal = total;
+                UpdateLabels();
+
+                if (!sameSet && !setChangeLogged)
+                {
+                    setChangeLogged = true;
+                    ModEntry.Log.Log("item categories changed while the window was open ("
+                        + counts.Count + " now, " + shownTypes.Count
+                        + " shown); the new ones appear after reopening the window.");
+                }
+            }
+            catch (Exception e)
+            {
+                ModEntry.Log.Error("RefreshCounts failed: " + e.Message);
+            }
         }
 
         private static void Build()
@@ -192,7 +256,10 @@ namespace Probability
         {
             List<GameItemElement> items = ItemFilter.ScanVisibleItems();
             Dictionary<string, int> counts = ItemFilter.CountByType(items, out int total);
-            lastCounts = counts;
+            currentCounts = counts;
+            currentTotal = total;
+            setChangeLogged = false;
+            shownTypes = new List<string>();
 
             // Keep the window where the player dragged it across rebuilds.
             RememberPosition();
@@ -224,7 +291,7 @@ namespace Probability
                 builder.Center();
             }
 
-            builder.AddHeader(Labels.Get("ui_total", "Items in view") + ": " + total);
+            builder.AddHeader(Labels.Get("ui_total", "Items in view") + ": " + total, "filter_total");
 
             builder.AddButton(
                 Labels.Get("ui_all", "Show all"),
@@ -243,6 +310,7 @@ namespace Probability
                 foreach (KeyValuePair<string, int> entry in OrderCategories(counts))
                 {
                     string type = entry.Key;
+                    shownTypes.Add(type);
                     builder.AddButton(Label(type, entry.Value), () => Select(type), "filter_" + type);
                 }
                 builder.End();

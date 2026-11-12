@@ -86,8 +86,10 @@ namespace Probability
             else if (Time.frameCount % 30 == 0)
             {
                 // Re-apply the dimming so items that appeared after the last
-                // pass (opened container, moved item) follow the filter too.
+                // pass (opened container, moved item) follow the filter too,
+                // and keep the category counts on the buttons up to date.
                 ItemFilter.Apply();
+                FilterWindow.RefreshCounts();
             }
         }
     }
