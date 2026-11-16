@@ -25,12 +25,14 @@ are not exposed.
 ## Molecular Assembly Room
 
 A custom battery-powered machine (分子装配室). Put a battery in the power slot and an item in the
-template slot: every few game turns the output slot receives a fresh copy of that item.
+template slot: every three game turns the output grid receives fresh copies of that item.
 
 * Copies are created through the game's item directory, so they are normal items that save and load.
 * Contents are not duplicated: liquids, inserted cards and modules stay with the template.
+* Cheaper templates come out in bigger batches (4 / 3 / 2 / 1 copies depending on item value).
+* The extension bay holds up to three universal modules; each one adds progress per turn.
 * The template slot refuses quest/important items, machines and containers that still hold items.
-* Handed out through the dev menu: **F9 → Modding → Probability: give 分子装配室**.
+* Purchased through the dev menu for 10,000 credits: **F9 → Modding → Probability: buy 分子装配室 (10000)**.
 
 ## How it works
 

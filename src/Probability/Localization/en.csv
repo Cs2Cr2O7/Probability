@@ -62,7 +62,7 @@ charm_desc,Spray it on yourself. The current customer stops resisting any price 
 
 asm_name,Molecular Assembly Room
 asm_flavor,Feed it a template and it feeds you copies.
-asm_desc,Install a battery and put an item in the template slot. Every few turns the output slot receives a fresh copy.
+asm_desc,Install a battery and put an item in the template slot. Every few turns the output slot receives fresh copies. Cheaper items come out in bigger batches; each universal module adds progress per turn.
 asm_template,Template
 asm_output,Output
 asm_progress,Progress
@@ -70,3 +70,7 @@ asm_off,Switched off
 asm_no_power,No power
 asm_blocked,Output occupied
 asm_failed,Template failed
+
+asm_modules,Modules
+asm_module_short,Modules
+asm_yield_short,Yield

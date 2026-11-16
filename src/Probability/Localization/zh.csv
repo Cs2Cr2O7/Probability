@@ -62,7 +62,7 @@ charm_desc,喷在自己身上。当前客人不再抗拒任何报价，也不会
 
 asm_name,分子装配室
 asm_flavor,给它一个模板，它给你一堆复制品。
-asm_desc,装上电池，把物品放进模板槽；每过几个回合，输出槽里就会出现一件全新的复制品。
+asm_desc,装上电池，把物品放进模板槽；每过 3 个回合输出一批复制品。物品越便宜一次产出越多；扩展槽里每个通用模块每回合额外推进 1 点进度。
 asm_template,模板槽
 asm_output,输出槽
 asm_progress,进度
@@ -70,3 +70,7 @@ asm_off,已关闭
 asm_no_power,电量不足
 asm_blocked,输出槽被占用
 asm_failed,模板无法复制
+
+asm_modules,扩展槽
+asm_module_short,模块
+asm_yield_short,产量

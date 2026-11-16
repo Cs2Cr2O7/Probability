@@ -5,9 +5,9 @@ using System.Runtime.CompilerServices;
 namespace Probability
 {
     /// <summary>
-    /// The "Molecular Assembly Room" machine: a battery-powered machine with a template slot and an
-    /// output slot. Every few game turns it prints a fresh copy of whatever sits in the template
-    /// slot, drawing energy from the battery in the power slot.
+    /// The "Molecular Assembly Room" machine: a battery-powered machine with a template slot, an
+    /// output grid and a small module bay. Every few game turns it prints fresh copies of whatever
+    /// sits in the template slot, drawing energy from the battery in the power slot.
     /// <para>
     /// The copy is created through <c>DirectoryMaster.Item(identifier)</c>, so it is a plain new item
     /// of the same kind: contents (liquids, inserted cards, modules) are not duplicated, which also
@@ -18,14 +18,20 @@ namespace Probability
     {
         internal const string ItemId = "molecular_assembler";
 
+        /// <summary>Price in credits for the F9 purchase entry.</summary>
+        internal const int PurchaseCost = 10000;
+
         private const string TemplateIdTag = "PROBABILITY_ASSEMBLER_TEMPLATE_ID_TAG";
         private const string ProgressTag = "PROBABILITY_ASSEMBLER_PROGRESS_TAG";
         private const string LastTurnTag = "PROBABILITY_ASSEMBLER_LAST_TURN_TAG";
 
-        /// <summary>Game turns needed for one copy (one turn = 20 in-game minutes).</summary>
-        private const int TurnsPerCopy = 6;
+        /// <summary>Game turns needed for one batch (one turn = 20 in-game minutes).</summary>
+        private const int TurnsPerCopy = 3;
 
-        /// <summary>Energy drawn from the battery when a copy is produced.</summary>
+        /// <summary>Universal modules that fit into the extension bay.</summary>
+        private const int ModuleSlots = 3;
+
+        /// <summary>Energy drawn from the battery when a batch is produced.</summary>
         private const int PowerPerCopy = 20;
 
         /// <summary>Power usage advertised by the machine, used by the battery tooltip.</summary>
@@ -40,19 +46,22 @@ namespace Probability
         {
             var batterySlot = new GameSlotInventory();
             var templateSlot = new GameSlotInventory();
-            var outputSlot = new GameSlotInventory();
+            var outputGrid = new GameGridInventory(2, 2);
+            var moduleGrid = new GameGridInventory(ModuleSlots, 1);
             var statusText = new MachineryText();
 
             PixelWindow contentWindow = MachineHelper.CreateMachineryWindow(
                 true,
                 MachineHelper.PowerPanel(batterySlot),
                 MachineHelper.Panel(Labels.Get("asm_template", "Template"), templateSlot, "template"),
-                MachineHelper.Panel(Labels.Get("asm_output", "Output"), outputSlot, "output"),
+                MachineHelper.Panel(Labels.Get("asm_output", "Output"), outputGrid, "output"),
+                MachineHelper.Panel(Labels.Get("asm_modules", "Modules"), moduleGrid, "modules"),
                 MachineHelper.Panel(Labels.Get("asm_progress", "Progress"), statusText, "progress"));
 
             templateSlot.mayInventoryAddItemFunc = (item, inventory) =>
                 GeneralHelper.IsItemOwned(item) && CanBeTemplate(item);
-            outputSlot.mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
+            outputGrid.mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
+            ContainerHelper.AllowOnlyTaggedItem(moduleGrid, "MODULE_TYPE_UNIVERSAL", ownedOnly: true);
 
             GameItem machine = ItemDirectory.CreateEmptyItem()
                 .SetContentWindow(contentWindow)
@@ -60,8 +69,8 @@ namespace Probability
             machine.name = Labels.Get("asm_name", "Molecular Assembly Room");
             machine.flavorText = Labels.Get("asm_flavor", "Feed it a template and it feeds you copies.");
             machine.shortDescription = Labels.Get("asm_desc",
-                "Install a battery, put an item in the template slot, and wait: every few turns the output slot receives a fresh copy.");
-            machine.unitValue = 750L;
+                "Install a battery, put an item in the template slot, and wait: every few turns the output slot receives fresh copies. Cheaper items come out in bigger batches, and universal modules speed the machine up.");
+            machine.unitValue = PurchaseCost;
             machine.SetGameItemType("MACHINE");
             machine.EnableTag("CONTAINER_TAG");
             machine.EnableTag("manufacture");
@@ -142,8 +151,9 @@ namespace Probability
 
             GameSlotInventory batterySlot = MachineHelper.GetBatterySlot(machine);
             GameSlotInventory templateSlot = MachineHelper.GetBodyStorage(machine, 1) as GameSlotInventory;
-            GameSlotInventory outputSlot = MachineHelper.GetBodyStorage(machine, 2) as GameSlotInventory;
-            if (batterySlot == null || templateSlot == null || outputSlot == null)
+            GameGridInventory outputGrid = MachineHelper.GetBodyStorage(machine, 2) as GameGridInventory;
+            GameGridInventory moduleGrid = MachineHelper.GetBodyStorage(machine, 3) as GameGridInventory;
+            if (batterySlot == null || templateSlot == null || outputGrid == null)
             {
                 return;
             }
@@ -153,7 +163,7 @@ namespace Probability
 
             if (!MachineryHelper.IsMachineryToggleOn(machine))
             {
-                Show(status, Labels.Get("asm_off", "Switched off"));
+                SetStatus(status, Labels.Get("asm_off", "Switched off"));
                 return;
             }
 
@@ -161,9 +171,12 @@ namespace Probability
             if (template == null)
             {
                 SetProgress(machine, 0);
-                Show(status, "0/" + TurnsPerCopy);
+                SetStatus(status, MakeProgressText(0, CountModules(moduleGrid), 0));
                 return;
             }
+
+            int modules = CountModules(moduleGrid);
+            int yield = GetYield(template);
 
             string identifier = template.identifier;
             if (machine.GetTagReadonly(TemplateIdTag).GetString() != identifier)
@@ -172,57 +185,103 @@ namespace Probability
                 SetProgress(machine, 0);
             }
 
-            if (outputSlot.childItem != null)
-            {
-                Show(status, Labels.Get("asm_blocked", "Output occupied"));
-                return;
-            }
-
-            int progress = GetProgress(machine) + 1;
+            int speed = 1 + modules;
+            int progress = GetProgress(machine) + speed;
             if (progress < TurnsPerCopy)
             {
                 SetProgress(machine, progress);
-                Show(status, progress + "/" + TurnsPerCopy);
+                SetStatus(status, MakeProgressText(progress, modules, yield));
                 return;
             }
 
             if (batterySlot.childItem == null || !PowerHelper.CanDrawPowerSource(batterySlot.childItem, PowerPerCopy))
             {
                 SetProgress(machine, TurnsPerCopy);
-                Show(status, Labels.Get("asm_no_power", "No power"));
+                SetStatus(status, Labels.Get("asm_no_power", "No power"));
                 return;
             }
 
-            GameItem copy = null;
-            try
+            int produced = 0;
+            for (int i = 0; i < yield; i++)
             {
-                copy = DirectoryMaster.Item(identifier);
-            }
-            catch (Exception e)
-            {
-                ModEntry.Log.Error("assembler could not create '" + identifier + "': " + e.Message);
+                GameItem copy = null;
+                try
+                {
+                    copy = DirectoryMaster.Item(identifier);
+                }
+                catch (Exception e)
+                {
+                    ModEntry.Log.Error("assembler could not create '" + identifier + "': " + e.Message);
+                    break;
+                }
+                if (copy == null)
+                {
+                    break;
+                }
+                if (!GraphUtils.CanAccept(outputGrid, copy))
+                {
+                    copy.Destroy();
+                    break;
+                }
+                GraphUtils.TryAcceptAll(outputGrid, copy);
+                produced++;
             }
 
-            if (copy == null)
+            if (produced == 0)
             {
                 SetProgress(machine, TurnsPerCopy);
-                Show(status, Labels.Get("asm_failed", "Template failed"));
+                SetStatus(status, Labels.Get("asm_blocked", "Output occupied"));
                 return;
             }
 
-            if (!GraphUtils.CanAccept(outputSlot, copy))
-            {
-                copy.Destroy();
-                SetProgress(machine, TurnsPerCopy);
-                Show(status, Labels.Get("asm_blocked", "Output occupied"));
-                return;
-            }
-
-            GraphUtils.TryAcceptAll(outputSlot, copy);
             PowerHelper.DrawPowerSource(batterySlot.childItem, PowerPerCopy);
             SetProgress(machine, 0);
-            Show(status, "0/" + TurnsPerCopy);
-            ModEntry.Log.Log("assembler produced a copy of '" + identifier + "'.");
+            SetStatus(status, MakeProgressText(0, modules, yield));
+            ModEntry.Log.Log("assembler produced " + produced + " copy/copies of '" + identifier + "'.");
+        }
+
+        /// <summary>Cheaper templates come out in bigger batches, expensive ones one at a time.</summary>
+        private static int GetYield(GameItem template)
+        {
+            long value;
+            try
+            {
+                value = template.GetValue();
+            }
+            catch
+            {
+                value = template.unitValue;
+            }
+            if (value < 100L)
+            {
+                return 4;
+            }
+            if (value < 500L)
+            {
+                return 3;
+            }
+            if (value < 2000L)
+            {
+                return 2;
+            }
+            return 1;
+        }
+
+        private static int CountModules(GameGridInventory moduleGrid)
+        {
+            if (moduleGrid == null || moduleGrid.childItems == null)
+            {
+                return 0;
+            }
+            return Math.Min(moduleGrid.childItems.Count, ModuleSlots);
+        }
+
+        private static string MakeProgressText(int current, int modules, int yield)
+        {
+            int shown = Math.Min(current, TurnsPerCopy);
+            return Labels.Get("asm_progress", "Progress") + ": " + shown + "/" + TurnsPerCopy
+                + "  " + Labels.Get("asm_module_short", "Modules") + ": " + modules
+                + (yield > 0 ? "  " + Labels.Get("asm_yield_short", "Yield") + ": " + yield : "");
         }
 
         private static bool CanBeTemplate(GameItem item)
@@ -268,7 +327,7 @@ namespace Probability
             machine.ModifyTag(ProgressTag, state => state.SetInt(value));
         }
 
-        private static void Show(MachineryText text, string value)
+        private static void SetStatus(MachineryText text, string value)
         {
             if (text == null)
             {
@@ -276,36 +335,53 @@ namespace Probability
             }
             try
             {
-                text.SetStatus(Labels.Get("asm_progress", "Progress"), value);
+                text.SetText(value);
             }
             catch
             {
             }
         }
 
-        /// <summary>Puts one assembler into the player inventory (F9 debug button).</summary>
-        internal static void GiveToPlayer()
+        /// <summary>Buys one assembler for <see cref="PurchaseCost"/> credits (F9 menu entry).</summary>
+        internal static void BuyFromMenu()
         {
             try
             {
+                PlayerStore store = PlayerStore.Instance;
+                EmporiumEntry emporium = EmporiumEntry.Instance;
+                if (store == null || emporium == null)
+                {
+                    ModEntry.Log.Log("buy: the store is not loaded yet.");
+                    return;
+                }
+                if (store.playerCash < PurchaseCost)
+                {
+                    ModEntry.Log.Log("buy: not enough credits (" + store.playerCash + "/" + PurchaseCost + ").");
+                    return;
+                }
                 GameItem item = DirectoryMaster.Item(ItemId);
                 if (item == null)
                 {
                     ModEntry.Log.Error("molecular assembler could not be created (directory missing).");
                     return;
                 }
-                EmporiumEntry emporium = EmporiumEntry.Instance;
-                if (emporium == null)
+                int leftover = GraphUtils.TryAcceptAll(emporium.invElement, item);
+                if (leftover > 0)
                 {
-                    ModEntry.Log.Error("debug: the store is not loaded yet.");
+                    item.Destroy();
+                    ModEntry.Log.Log("buy: inventory is full.");
                     return;
                 }
-                GraphUtils.EmporiumTryAdd(emporium.invElement, item);
-                ModEntry.Log.Log("debug: gave one molecular assembly room.");
+                store.playerCash -= PurchaseCost;
+                if (EmporiumAudioPlayer.Instance != null)
+                {
+                    EmporiumAudioPlayer.Instance.PlayRegister();
+                }
+                ModEntry.Log.Log("bought a molecular assembly room for " + PurchaseCost + " credits.");
             }
             catch (Exception e)
             {
-                ModEntry.Log.Error("giving the molecular assembler failed: " + e);
+                ModEntry.Log.Error("buying the molecular assembler failed: " + e);
             }
         }
     }
