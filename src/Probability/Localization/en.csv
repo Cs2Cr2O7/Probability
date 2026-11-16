@@ -76,7 +76,6 @@ asm_module_short,Modules
 asm_yield_short,Yield
 
 asm_drain_short,Drain
-asm_hint_printer,Rumor: leave this printer, three Super Charm Perfumes, an uncapped neural core and twenty pieces of scrap metal in the store overnight...
-asm_hint_perfume,Succubus secretions smell like a bad debt.
+asm_hint_printer,Rumor: leave this printer, an uncapped neural core, 6 hypertech electronics, 10 printer plastic, 10 common electronics and 5 wire in the store overnight...
 
 asm_no_space,Not enough output space

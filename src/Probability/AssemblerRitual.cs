@@ -4,22 +4,23 @@ using System.Collections.Generic;
 namespace Probability
 {
     /// <summary>
-    /// The (intentionally silly) way to obtain the Molecular Assembly Room: leave one 3D printer,
-    /// three Super Charm Perfumes, one uncapped neural core and twenty pieces of scrap metal in the
-    /// store and go to sleep. In the morning the machine has assembled itself.
-    /// <para>
-    /// The recipe is hinted in the tooltips of the printer and the perfume, so players can find it
-    /// without reading the mod source.
-    /// </para>
+    /// The (intentionally silly) way to obtain the Molecular Assembly Room: leave a 3D printer plus
+    /// a pile of electronics and scrap in the store and go to sleep. In the morning the machine has
+    /// assembled itself. The recipe is hinted in the printer tooltip.
     /// </summary>
     internal static class AssemblerRitual
     {
         private const string PrinterId = "printer";
         private const string NeuralCoreId = "system_uncapped_neural_core";
-        private const string ScrapMetalId = "scrap_metal";
+        private const string HypertechElectronicId = "hypertech_electronic";
+        private const string PrinterPlasticId = "printer_plastic";
+        private const string CommonElectronicId = "common_electronic";
+        private const string WireId = "wire";
 
-        private const int PerfumeNeeded = 3;
-        private const int ScrapMetalNeeded = 20;
+        private const int HypertechElectronicNeeded = 6;
+        private const int PrinterPlasticNeeded = 10;
+        private const int CommonElectronicNeeded = 10;
+        private const int WireNeeded = 5;
 
         private static bool subscribed;
 
@@ -62,9 +63,11 @@ namespace Probability
                     return;
                 }
                 if (!Contains(owned, PrinterId, 1)
-                    || !Contains(owned, CharmPerfumeDirectory.ItemId, PerfumeNeeded)
                     || !Contains(owned, NeuralCoreId, 1)
-                    || !Contains(owned, ScrapMetalId, ScrapMetalNeeded))
+                    || !Contains(owned, HypertechElectronicId, HypertechElectronicNeeded)
+                    || !Contains(owned, PrinterPlasticId, PrinterPlasticNeeded)
+                    || !Contains(owned, CommonElectronicId, CommonElectronicNeeded)
+                    || !Contains(owned, WireId, WireNeeded))
                 {
                     return;
                 }
@@ -85,9 +88,11 @@ namespace Probability
                 }
 
                 Consume(owned, PrinterId, 1);
-                Consume(owned, CharmPerfumeDirectory.ItemId, PerfumeNeeded);
                 Consume(owned, NeuralCoreId, 1);
-                Consume(owned, ScrapMetalId, ScrapMetalNeeded);
+                Consume(owned, HypertechElectronicId, HypertechElectronicNeeded);
+                Consume(owned, PrinterPlasticId, PrinterPlasticNeeded);
+                Consume(owned, CommonElectronicId, CommonElectronicNeeded);
+                Consume(owned, WireId, WireNeeded);
 
                 if (EmporiumAudioPlayer.Instance != null)
                 {
@@ -113,7 +118,7 @@ namespace Probability
                 {
                     builder.AddLine(
                         Labels.Get("asm_hint_printer",
-                            "Rumor: leave this printer, three Super Charm Perfumes, an uncapped neural core and twenty pieces of scrap metal in the store overnight..."),
+                            "Rumor: leave this printer, an uncapped neural core, 6 hypertech electronics, 10 printer plastic, 10 common electronics and 5 wire in the store overnight..."),
                         color: RenderHandler.ColorPalette.Gray,
                         italic: true);
                 }

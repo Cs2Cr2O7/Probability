@@ -53,8 +53,7 @@ namespace Probability
             item.SetValue(800L);
             item.SetGameItemType("LUXURY_ITEM");
             item.EnableManufacturer("solana");
-            item.flavorText = Labels.Get("charm_flavor", "Active ingredient extracted from succubus secretions.")
-                + "\n" + Labels.Get("asm_hint_perfume", "Succubus secretions smell like a bad debt.");
+            item.flavorText = Labels.Get("charm_flavor", "Active ingredient extracted from succubus secretions.");
             item.shortDescription = Labels.Get("charm_desc", "Spray it on yourself: the current customer stops resisting your price and ignores forged labels.");
             AudioHelper.InitGlass(item);
             UseCountHelper.InitUseCountItem(item, 3, transferable: true, destroyOnEmpty: true, useAutoValue: true, 0, 40);

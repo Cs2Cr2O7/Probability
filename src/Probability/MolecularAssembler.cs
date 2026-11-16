@@ -72,11 +72,8 @@ namespace Probability
             {
                 outputSlots[i] = new GameSlotInventory();
                 outputSlots[i].mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
-                // Keep every output panel the same height: a null label removes the 18px label row,
-                // so the slots after the first would sit higher than the labelled one. An empty
-                // string keeps the row without showing text.
                 panels.Add(MachineHelper.Panel(
-                    i == 0 ? Labels.Get("asm_output", "Output") : string.Empty,
+                    Labels.Get("asm_output", "Output") + " " + (i + 1),
                     outputSlots[i],
                     "output"));
             }

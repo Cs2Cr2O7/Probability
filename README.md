@@ -34,10 +34,10 @@ template slot: every 30 seconds of real time the output grid receives fresh copi
   the battery drain by 25% per tick (25% base, 100% with three modules).
 * The template slot refuses quest/important items, machines and containers that still hold items.
 
-**How to get it:** there is no shop entry. Leave one 3D printer, three Super Charm Perfumes, one
-uncapped neural core and twenty pieces of scrap metal in the store, then go to sleep — in the
-morning the machine has assembled itself and the ingredients are consumed. The hint is written in
-the gray italic lines of the printer and perfume tooltips.
+**How to get it:** there is no shop entry. Leave one 3D printer, one uncapped neural core, six
+hypertech electronics, ten printer plastic, ten common electronics and five wire in the store, then
+go to sleep — in the morning the machine has assembled itself and the ingredients are consumed. The
+hint is written in the gray italic line of the printer tooltip.
 
 ## How it works
 
@@ -90,7 +90,7 @@ workspace and are not published in this repository.
 
 ## Status
 
-Current version: **0.3.3.0**. Compiles against game version 1.0.0.x; the filter is verified in a
+Current version: **0.3.3.1**. Compiles against game version 1.0.0.x; the filter is verified in a
 running game. The charm perfume and the molecular assembly room are implemented but have not been
 verified in a live save yet.
 
