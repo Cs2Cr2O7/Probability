@@ -25,13 +25,13 @@ are not exposed.
 ## Molecular Assembly Room
 
 A custom battery-powered machine (分子装配室). Put a battery in the power slot and an item in the
-template slot: every three game turns the output grid receives fresh copies of that item.
+template slot: every three shop nights the output grid receives fresh copies of that item.
 
 * Copies are created through the game's item directory, so they are normal items that save and load.
 * Contents are not duplicated: liquids, inserted cards and modules stay with the template.
 * Cheaper templates come out in bigger batches (4 / 3 / 2 / 1 copies depending on item value).
-* The extension bay holds up to three universal modules: each adds progress per turn and also raises
-  the battery drain by 25% per turn (25% base, 100% with three modules).
+* The extension bay holds up to three universal modules: each adds progress per night and also raises
+  the battery drain by 25% per night (25% base, 100% with three modules).
 * The template slot refuses quest/important items, machines and containers that still hold items.
 
 **How to get it:** there is no shop entry. Leave one 3D printer, three Super Charm Perfumes, one

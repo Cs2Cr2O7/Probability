@@ -32,6 +32,7 @@ namespace Probability
 
                 CharmPerfumeDirectory.EnsureRegistered();
                 AssemblerRitual.Subscribe();
+                MolecularAssembler.Subscribe();
 
                 if (hostObject != null)
                 {
@@ -57,6 +58,7 @@ namespace Probability
                 FilterWindow.Close();
                 CharmEffect.Clear();
                 AssemblerRitual.Unsubscribe();
+                MolecularAssembler.Unsubscribe();
 
                 if (hostObject != null)
                 {
@@ -78,8 +80,6 @@ namespace Probability
             {
                 FilterWindow.Toggle();
             }
-
-            MolecularAssembler.RuntimeTick();
 
             if (!ItemFilter.IsActive)
             {

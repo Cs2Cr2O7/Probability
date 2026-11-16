@@ -25,7 +25,6 @@ namespace Probability
 
         private const string TemplateIdTag = "PROBABILITY_ASSEMBLER_TEMPLATE_ID_TAG";
         private const string ProgressTag = "PROBABILITY_ASSEMBLER_PROGRESS_TAG";
-        private const string LastTurnTag = "PROBABILITY_ASSEMBLER_LAST_TURN_TAG";
 
         /// <summary>Game turns needed for one batch (one turn = 20 in-game minutes).</summary>
         private const int TurnsPerCopy = 3;
@@ -48,7 +47,6 @@ namespace Probability
         private static readonly ConditionalWeakTable<GameItem, MachineryText> StatusTexts =
             new ConditionalWeakTable<GameItem, MachineryText>();
 
-        private static int lastProcessedTurn = -1;
 
         internal static GameItem Create()
         {
@@ -88,7 +86,6 @@ namespace Probability
             MachineryHelper.InitMachinery(machine, PowerUsage);
             machine.ModifyTag(ProgressTag, state => state.Enable().SetInt(0));
             machine.ModifyTag(TemplateIdTag, state => state.Enable().SetString(""));
-            machine.ModifyTag(LastTurnTag, state => state.Enable().SetInt(-1));
             machine.onLoaded = loaded => loaded.EnableTag("CONTAINER_TAG");
 
             statusText.SetText("0/" + TurnsPerCopy);
@@ -96,38 +93,53 @@ namespace Probability
             return machine;
         }
 
+        private static bool subscribed;
+
+        internal static void Subscribe()
+        {
+            if (subscribed)
+            {
+                return;
+            }
+            ModHook.OnGoingSleepLate += OnNight;
+            subscribed = true;
+        }
+
+        internal static void Unsubscribe()
+        {
+            if (!subscribed)
+            {
+                return;
+            }
+            ModHook.OnGoingSleepLate -= OnNight;
+            subscribed = false;
+        }
+
         /// <summary>
-        /// Progresses every assembler once per game turn. Called from <see cref="ModEntry.Tick"/>;
-        /// store machines are not part of the ship item graph, so their turn-end item callbacks are
-        /// not driven by <c>TurnManager</c> and we advance them here instead.
+        /// Progresses every assembler once per shop night. Shop time is not driven by
+        /// <c>TurnManager</c> (that counter is ship/raid time and does not move while trading), so we
+        /// hook the nightly sleep event instead, matching how the vanilla shop machines advance.
         /// </summary>
-        internal static void RuntimeTick()
+        private static void OnNight()
         {
             try
             {
                 GameMaster master = GameMaster.current;
-                if (master == null || master.turnManager == null || PlayerStore.Instance == null)
+                if (master == null || PlayerStore.Instance == null)
                 {
                     return;
                 }
-                int turn = master.turnManager.turns;
-                if (turn == lastProcessedTurn)
-                {
-                    return;
-                }
-                lastProcessedTurn = turn;
-
                 foreach (GameItem item in FindAssemblers())
                 {
                     if (item != null && item.identifier == ItemId)
                     {
-                        Process(item, turn);
+                        Process(item);
                     }
                 }
             }
             catch (Exception e)
             {
-                ModEntry.Log.Error("molecular assembler tick failed: " + e.Message);
+                ModEntry.Log.Error("molecular assembler night pass failed: " + e.Message);
             }
         }
 
@@ -149,14 +161,8 @@ namespace Probability
             return found;
         }
 
-        private static void Process(GameItem machine, int turn)
+        private static void Process(GameItem machine)
         {
-            if (machine.GetTagReadonly(LastTurnTag).GetInt() == turn)
-            {
-                return;
-            }
-            machine.ModifyTag(LastTurnTag, state => state.SetInt(turn));
-
             GameSlotInventory batterySlot = MachineHelper.GetBatterySlot(machine);
             GameSlotInventory templateSlot = MachineHelper.GetBodyStorage(machine, 1) as GameSlotInventory;
             GameGridInventory outputGrid = MachineHelper.GetBodyStorage(machine, 2) as GameGridInventory;
