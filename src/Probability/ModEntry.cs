@@ -28,9 +28,10 @@ namespace Probability
             {
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: item category filter", FilterWindow.Toggle, tall: true);
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 超级魅惑香水", CharmPerfumeDirectory.GiveToPlayer, tall: true);
-                ModHelper.AddDebugFunction(ModId, "Modding", "Probability: buy 分子装配室 (10000)", MolecularAssembler.BuyFromMenu, tall: true);
+                
 
                 CharmPerfumeDirectory.EnsureRegistered();
+                AssemblerRitual.Subscribe();
 
                 if (hostObject != null)
                 {
@@ -55,6 +56,7 @@ namespace Probability
                 ModHelper.RemoveDebugFunctions(ModId);
                 FilterWindow.Close();
                 CharmEffect.Clear();
+                AssemblerRitual.Unsubscribe();
 
                 if (hostObject != null)
                 {

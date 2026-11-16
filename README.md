@@ -30,9 +30,14 @@ template slot: every three game turns the output grid receives fresh copies of t
 * Copies are created through the game's item directory, so they are normal items that save and load.
 * Contents are not duplicated: liquids, inserted cards and modules stay with the template.
 * Cheaper templates come out in bigger batches (4 / 3 / 2 / 1 copies depending on item value).
-* The extension bay holds up to three universal modules; each one adds progress per turn.
+* The extension bay holds up to three universal modules: each adds progress per turn and also raises
+  the battery drain by 25% per turn (25% base, 100% with three modules).
 * The template slot refuses quest/important items, machines and containers that still hold items.
-* Purchased through the dev menu for 10,000 credits: **F9 → Modding → Probability: buy 分子装配室 (10000)**.
+
+**How to get it:** there is no shop entry. Leave one 3D printer, three Super Charm Perfumes, one
+uncapped neural core and twenty pieces of scrap metal in the store, then go to sleep — in the
+morning the machine has assembled itself and the ingredients are consumed. The hint is written in
+the gray italic lines of the printer and perfume tooltips.
 
 ## How it works
 

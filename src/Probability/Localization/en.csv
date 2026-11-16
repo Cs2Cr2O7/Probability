@@ -62,7 +62,7 @@ charm_desc,Spray it on yourself. The current customer stops resisting any price 
 
 asm_name,Molecular Assembly Room
 asm_flavor,Feed it a template and it feeds you copies.
-asm_desc,Install a battery and put an item in the template slot. Every few turns the output slot receives fresh copies. Cheaper items come out in bigger batches; each universal module adds progress per turn.
+asm_desc,Install a battery and put an item in the template slot. Every three turns the output grid receives fresh copies. Cheaper items come out in bigger batches. Modules add progress per turn and also raise the battery drain by 25% each.
 asm_template,Template
 asm_output,Output
 asm_progress,Progress
@@ -74,3 +74,7 @@ asm_failed,Template failed
 asm_modules,Modules
 asm_module_short,Modules
 asm_yield_short,Yield
+
+asm_drain_short,Drain
+asm_hint_printer,Rumor: leave this printer, three Super Charm Perfumes, an uncapped neural core and twenty pieces of scrap metal in the store overnight...
+asm_hint_perfume,Succubus secretions smell like a bad debt.
