@@ -90,9 +90,9 @@ workspace and are not published in this repository.
 
 ## Status
 
-Compiles against game version 1.0.0.x; the filter is verified in a running game. The charm
-perfume and the molecular assembly room are implemented but have not been verified in a live
-save yet.
+Current version: **0.3.3.0**. Compiles against game version 1.0.0.x; the filter is verified in a
+running game. The charm perfume and the molecular assembly room are implemented but have not been
+verified in a live save yet.
 
 ## Credits
 

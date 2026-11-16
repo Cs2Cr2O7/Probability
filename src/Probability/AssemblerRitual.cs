@@ -117,14 +117,7 @@ namespace Probability
                         color: RenderHandler.ColorPalette.Gray,
                         italic: true);
                 }
-                else if (item.identifier == CharmPerfumeDirectory.ItemId)
-                {
-                    builder.AddLine(
-                        Labels.Get("asm_hint_perfume",
-                            "Succubus secretions smell like a bad debt."),
-                        color: RenderHandler.ColorPalette.Gray,
-                        italic: true);
-                }
+
             }
             catch
             {
