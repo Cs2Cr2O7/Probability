@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -33,6 +34,9 @@ namespace Probability
         private const int ModuleSlots = 3;
 
         /// <summary>Battery charge drawn per processing turn without modules, in percent of max.</summary>
+        /// <summary>Real seconds between two progress ticks.</summary>
+        private const float TickSeconds = 30f;
+
         private const int BaseDrainPercent = 25;
 
         /// <summary>Extra battery charge drawn per installed module, in percent of max.</summary>
@@ -43,6 +47,8 @@ namespace Probability
 
         /// <summary>Trade value of the machine (it is not sold anywhere, only assembled by ritual).</summary>
         private const long TradeValue = 10000L;
+
+        private static float elapsed;
 
         private static readonly ConditionalWeakTable<GameItem, MachineryText> StatusTexts =
             new ConditionalWeakTable<GameItem, MachineryText>();
@@ -75,7 +81,7 @@ namespace Probability
             machine.name = Labels.Get("asm_name", "Molecular Assembly Room");
             machine.flavorText = Labels.Get("asm_flavor", "Feed it a template and it feeds you copies.");
             machine.shortDescription = Labels.Get("asm_desc",
-                "Install a battery, put an item in the template slot, and wait: every three turns the output grid receives fresh copies. Cheaper items come out in bigger batches. Modules add progress per turn and also raise the battery drain by 25% each.");
+                "Install a battery, put an item in the template slot, and wait: every 30 seconds of real time the output grid receives fresh copies. Cheaper items come out in bigger batches. Modules add progress per tick and also raise the battery drain by 25% each.");
             machine.unitValue = TradeValue;
             machine.SetGameItemType("MACHINE");
             machine.EnableTag("CONTAINER_TAG");
@@ -93,39 +99,22 @@ namespace Probability
             return machine;
         }
 
-        private static bool subscribed;
-
-        internal static void Subscribe()
-        {
-            if (subscribed)
-            {
-                return;
-            }
-            ModHook.OnGoingSleepLate += OnNight;
-            subscribed = true;
-        }
-
-        internal static void Unsubscribe()
-        {
-            if (!subscribed)
-            {
-                return;
-            }
-            ModHook.OnGoingSleepLate -= OnNight;
-            subscribed = false;
-        }
-
         /// <summary>
-        /// Progresses every assembler once per shop night. Shop time is not driven by
-        /// <c>TurnManager</c> (that counter is ship/raid time and does not move while trading), so we
-        /// hook the nightly sleep event instead, matching how the vanilla shop machines advance.
+        /// Advances every assembler once per real-time interval. Called every frame from
+        /// <see cref="ModEntry.Tick"/>; the timer only runs while the game is actually running.
         /// </summary>
-        private static void OnNight()
+        internal static void RuntimeTick()
         {
             try
             {
-                GameMaster master = GameMaster.current;
-                if (master == null || PlayerStore.Instance == null)
+                elapsed += Time.deltaTime;
+                if (elapsed < TickSeconds)
+                {
+                    return;
+                }
+                elapsed = 0f;
+
+                if (GameMaster.current == null || PlayerStore.Instance == null)
                 {
                     return;
                 }
@@ -139,7 +128,7 @@ namespace Probability
             }
             catch (Exception e)
             {
-                ModEntry.Log.Error("molecular assembler night pass failed: " + e.Message);
+                ModEntry.Log.Error("molecular assembler tick failed: " + e.Message);
             }
         }
 
