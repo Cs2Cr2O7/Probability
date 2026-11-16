@@ -58,7 +58,7 @@ namespace Probability
         {
             var batterySlot = new GameSlotInventory();
             var templateSlot = new GameSlotInventory();
-            var outputGrid = new GameGridInventory(2, 2);
+            var outputGrid = new GameGridInventory(6, 4);
             var moduleGrid = new GameGridInventory(ModuleSlots, 1);
             var statusText = new MachineryText();
 
@@ -71,7 +71,7 @@ namespace Probability
                 MachineHelper.Panel(Labels.Get("asm_progress", "Progress"), statusText, "progress"));
 
             templateSlot.mayInventoryAddItemFunc = (item, inventory) =>
-                GeneralHelper.IsItemOwned(item) && CanBeTemplate(item);
+                GeneralHelper.IsItemOwned(item) && CanBeTemplate(item) && GraphUtils.CanAccept(outputGrid, item);
             outputGrid.mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
             ContainerHelper.AllowOnlyTaggedItem(moduleGrid, "MODULE_TYPE_UNIVERSAL", ownedOnly: true);
 
@@ -189,10 +189,14 @@ namespace Probability
                 SetProgress(machine, 0);
             }
 
-            if (outputGrid.childItems != null && outputGrid.childItems.Count >= 4)
+            int progress = GetProgress(machine) + 1 + modules;
+            if (progress >= TurnsPerCopy && !GraphUtils.CanAccept(outputGrid, template))
             {
-                SetStatus(status, Labels.Get("asm_blocked", "Output occupied")
-                    + " (" + Math.Min(GetProgress(machine), TurnsPerCopy) + "/" + TurnsPerCopy + ")");
+                if (GetProgress(machine) > TurnsPerCopy)
+                {
+                    SetProgress(machine, TurnsPerCopy);
+                }
+                SetStatus(status, Labels.Get("asm_no_space", "Not enough output space"));
                 return;
             }
 
@@ -205,8 +209,6 @@ namespace Probability
             }
 
             PowerHelper.DrawPowerSource(battery, required);
-
-            int progress = GetProgress(machine) + 1 + modules;
             if (progress < TurnsPerCopy)
             {
                 SetProgress(machine, progress);
