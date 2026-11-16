@@ -59,3 +59,14 @@ cat_weapon,Weapon
 charm_name,Super Charm Perfume
 charm_flavor,Active ingredient extracted from succubus secretions.
 charm_desc,Spray it on yourself. The current customer stops resisting any price and will not expose forged labels.
+
+asm_name,Molecular Assembly Room
+asm_flavor,Feed it a template and it feeds you copies.
+asm_desc,Install a battery and put an item in the template slot. Every few turns the output slot receives a fresh copy.
+asm_template,Template
+asm_output,Output
+asm_progress,Progress
+asm_off,Switched off
+asm_no_power,No power
+asm_blocked,Output occupied
+asm_failed,Template failed

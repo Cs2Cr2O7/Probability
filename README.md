@@ -22,6 +22,16 @@ are not exposed.
 * Effects are applied with a few Harmony patches and end when that customer leaves.
 * For now it is handed out through the dev menu: **F9 → Modding → Probability: give 超级魅惑香水**.
 
+## Molecular Assembly Room
+
+A custom battery-powered machine (分子装配室). Put a battery in the power slot and an item in the
+template slot: every few game turns the output slot receives a fresh copy of that item.
+
+* Copies are created through the game's item directory, so they are normal items that save and load.
+* Contents are not duplicated: liquids, inserted cards and modules stay with the template.
+* The template slot refuses quest/important items, machines and containers that still hold items.
+* Handed out through the dev menu: **F9 → Modding → Probability: give 分子装配室**.
+
 ## How it works
 
 * Categories come from the game's own taxonomy: `GameItem.itemTypes` (`FOOD`, `MEDICAL`,
@@ -65,7 +75,7 @@ post-build copy step; each project only declares its assembly references.
 
 | Path | Contents |
 |---|---|
-| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `CharmPerfume.cs`, `CharmEffect.cs`, `CharmPatches.cs`, `manifest.xml`, `Localization\`) |
+| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `CharmPerfume.cs`, `CharmEffect.cs`, `CharmPatches.cs`, `MolecularAssembler.cs`, `manifest.xml`, `Localization\`) |
 | `src\Directory.Build.props` | shared build settings + install-to-Mods step |
 
 Maintenance notes (feature acceptance, architecture, decisions, history) are kept in the local
@@ -74,7 +84,8 @@ workspace and are not published in this repository.
 ## Status
 
 Compiles against game version 1.0.0.x; the filter is verified in a running game. The charm
-perfume item is implemented but has not been verified in a live save yet.
+perfume and the molecular assembly room are implemented but have not been verified in a live
+save yet.
 
 ## Credits
 

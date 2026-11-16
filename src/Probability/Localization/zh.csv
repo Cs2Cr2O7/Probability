@@ -59,3 +59,14 @@ cat_weapon,武器
 charm_name,超级魅惑香水
 charm_flavor,有效成分提取自魅魔分泌物
 charm_desc,喷在自己身上。当前客人不再抗拒任何报价，也不会识破伪造的标签。
+
+asm_name,分子装配室
+asm_flavor,给它一个模板，它给你一堆复制品。
+asm_desc,装上电池，把物品放进模板槽；每过几个回合，输出槽里就会出现一件全新的复制品。
+asm_template,模板槽
+asm_output,输出槽
+asm_progress,进度
+asm_off,已关闭
+asm_no_power,电量不足
+asm_blocked,输出槽被占用
+asm_failed,模板无法复制

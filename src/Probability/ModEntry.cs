@@ -28,6 +28,7 @@ namespace Probability
             {
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: item category filter", FilterWindow.Toggle, tall: true);
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 超级魅惑香水", CharmPerfumeDirectory.GiveToPlayer, tall: true);
+                ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 分子装配室", MolecularAssembler.GiveToPlayer, tall: true);
 
                 CharmPerfumeDirectory.EnsureRegistered();
 
@@ -39,7 +40,7 @@ namespace Probability
                 UnityEngine.Object.DontDestroyOnLoad(hostObject);
                 hostObject.AddComponent<HotkeyHost>();
 
-                Log.Log("enabled. Press F7 (or the F9 debug button) to open the category filter.");
+                Log.Log("enabled. F7 opens the category filter; the F9 Modding tab hands out the mod items.");
             }
             catch (Exception e)
             {
@@ -74,8 +75,9 @@ namespace Probability
             if (Input.GetKeyDown(KeyCode.F7))
             {
                 FilterWindow.Toggle();
-                return;
             }
+
+            MolecularAssembler.RuntimeTick();
 
             if (!ItemFilter.IsActive)
             {

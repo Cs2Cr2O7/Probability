@@ -35,12 +35,14 @@ namespace Probability
                 DirectoryMaster.AddDirectory(instance);
             }
             instance.factoryDictionary[ItemId] = CreatePerfume;
-            ModEntry.Log.Log("charm perfume item registered as '" + ItemId + "'.");
+            instance.factoryDictionary[MolecularAssembler.ItemId] = MolecularAssembler.Create;
+            ModEntry.Log.Log("mod items registered: '" + ItemId + "', '" + MolecularAssembler.ItemId + "'.");
         }
 
         protected override void InitDirectory()
         {
             Add(ItemId, CreatePerfume);
+            Add(MolecularAssembler.ItemId, MolecularAssembler.Create);
         }
 
         internal static GameItem CreatePerfume()
