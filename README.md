@@ -29,10 +29,10 @@ template slot: every 30 seconds of real time the output grid receives fresh copi
 
 * Copies are created through the game's item directory, so they are normal items that save and load.
 * Contents are not duplicated: liquids, inserted cards and modules stay with the template.
-* Cheaper templates come out in bigger batches (4 / 3 / 2 / 1 copies depending on item value), limited by the 6x4 output grid.
+* Cheaper templates come out in bigger batches (4 / 3 / 2 / 1 copies depending on item value). The four pocket output slots each hold one item whatever its shape, and a batch is delivered whole.
 * The extension bay holds up to three universal modules: each adds progress per tick and also raises
   the battery drain by 25% per tick (25% base, 100% with three modules).
-* The template slot refuses quest/important items, machines, containers that still hold items, and items whose shape cannot fit the output grid.
+* The template slot refuses quest/important items, machines and containers that still hold items.
 
 **How to get it:** there is no shop entry. Leave one 3D printer, three Super Charm Perfumes, one
 uncapped neural core and twenty pieces of scrap metal in the store, then go to sleep — in the

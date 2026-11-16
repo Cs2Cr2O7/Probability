@@ -30,6 +30,9 @@ namespace Probability
         /// <summary>Game turns needed for one batch (one turn = 20 in-game minutes).</summary>
         private const int TurnsPerCopy = 3;
 
+        /// <summary>Pocket output slots. Each holds one item regardless of its shape; also the max batch.</summary>
+        private const int MaxBatch = 4;
+
         /// <summary>Universal modules that fit into the extension bay.</summary>
         private const int ModuleSlots = 3;
 
@@ -58,21 +61,29 @@ namespace Probability
         {
             var batterySlot = new GameSlotInventory();
             var templateSlot = new GameSlotInventory();
-            var outputGrid = new GameGridInventory(6, 4);
+            var outputSlots = new GameSlotInventory[MaxBatch];
             var moduleGrid = new GameGridInventory(ModuleSlots, 1);
             var statusText = new MachineryText();
 
-            PixelWindow contentWindow = MachineHelper.CreateMachineryWindow(
-                true,
-                MachineHelper.PowerPanel(batterySlot),
-                MachineHelper.Panel(Labels.Get("asm_template", "Template"), templateSlot, "template"),
-                MachineHelper.Panel(Labels.Get("asm_output", "Output"), outputGrid, "output"),
-                MachineHelper.Panel(Labels.Get("asm_modules", "Modules"), moduleGrid, "modules"),
-                MachineHelper.Panel(Labels.Get("asm_progress", "Progress"), statusText, "progress"));
+            var panels = new List<MachineryPanel>();
+            panels.Add(MachineHelper.PowerPanel(batterySlot));
+            panels.Add(MachineHelper.Panel(Labels.Get("asm_template", "Template"), templateSlot, "template"));
+            for (int i = 0; i < MaxBatch; i++)
+            {
+                outputSlots[i] = new GameSlotInventory();
+                outputSlots[i].mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
+                panels.Add(MachineHelper.Panel(
+                    i == 0 ? Labels.Get("asm_output", "Output") : null,
+                    outputSlots[i],
+                    "output"));
+            }
+            panels.Add(MachineHelper.Panel(Labels.Get("asm_modules", "Modules"), moduleGrid, "modules"));
+            panels.Add(MachineHelper.Panel(Labels.Get("asm_progress", "Progress"), statusText, "progress"));
+
+            PixelWindow contentWindow = MachineHelper.CreateMachineryWindow(true, panels.ToArray());
 
             templateSlot.mayInventoryAddItemFunc = (item, inventory) =>
-                GeneralHelper.IsItemOwned(item) && CanBeTemplate(item) && GraphUtils.CanAccept(outputGrid, item);
-            outputGrid.mayInventoryAddItemFunc = (item, inventory) => GeneralHelper.IsItemOwned(item);
+                GeneralHelper.IsItemOwned(item) && CanBeTemplate(item);
             ContainerHelper.AllowOnlyTaggedItem(moduleGrid, "MODULE_TYPE_UNIVERSAL", ownedOnly: true);
 
             GameItem machine = ItemDirectory.CreateEmptyItem()
@@ -81,7 +92,7 @@ namespace Probability
             machine.name = Labels.Get("asm_name", "Molecular Assembly Room");
             machine.flavorText = Labels.Get("asm_flavor", "Feed it a template and it feeds you copies.");
             machine.shortDescription = Labels.Get("asm_desc",
-                "Install a battery, put an item in the template slot, and wait: every 30 seconds of real time the output grid receives fresh copies. Cheaper items come out in bigger batches. Modules add progress per tick and also raise the battery drain by 25% each.");
+                "Install a battery, put an item in the template slot, and wait: every 30 seconds of real time the output slots receive fresh copies. Cheaper items come out in bigger batches. Each of the four pocket output slots holds one item, whatever its shape. Modules add progress per tick and also raise the battery drain by 25% each.");
             machine.unitValue = TradeValue;
             machine.SetGameItemType("MACHINE");
             machine.EnableTag("CONTAINER_TAG");
@@ -154,9 +165,13 @@ namespace Probability
         {
             GameSlotInventory batterySlot = MachineHelper.GetBatterySlot(machine);
             GameSlotInventory templateSlot = MachineHelper.GetBodyStorage(machine, 1) as GameSlotInventory;
-            GameGridInventory outputGrid = MachineHelper.GetBodyStorage(machine, 2) as GameGridInventory;
-            GameGridInventory moduleGrid = MachineHelper.GetBodyStorage(machine, 3) as GameGridInventory;
-            if (batterySlot == null || templateSlot == null || outputGrid == null)
+            var outputSlots = new GameSlotInventory[MaxBatch];
+            for (int i = 0; i < MaxBatch; i++)
+            {
+                outputSlots[i] = MachineHelper.GetBodyStorage(machine, 2 + i) as GameSlotInventory;
+            }
+            GameGridInventory moduleGrid = MachineHelper.GetBodyStorage(machine, 2 + MaxBatch) as GameGridInventory;
+            if (batterySlot == null || templateSlot == null || moduleGrid == null)
             {
                 return;
             }
@@ -190,7 +205,7 @@ namespace Probability
             }
 
             int progress = GetProgress(machine) + 1 + modules;
-            if (progress >= TurnsPerCopy && !GraphUtils.CanAccept(outputGrid, template))
+            if (progress >= TurnsPerCopy && CountFreeSlots(outputSlots) < yield)
             {
                 if (GetProgress(machine) > TurnsPerCopy)
                 {
@@ -217,8 +232,16 @@ namespace Probability
             }
 
             int produced = 0;
-            for (int i = 0; i < yield; i++)
+            foreach (GameSlotInventory slot in outputSlots)
             {
+                if (produced >= yield)
+                {
+                    break;
+                }
+                if (slot == null || slot.childItem != null)
+                {
+                    continue;
+                }
                 GameItem copy = null;
                 try
                 {
@@ -233,12 +256,12 @@ namespace Probability
                 {
                     break;
                 }
-                if (!GraphUtils.CanAccept(outputGrid, copy))
+                if (!GraphUtils.CanAccept(slot, copy))
                 {
                     copy.Destroy();
                     break;
                 }
-                GraphUtils.TryAcceptAll(outputGrid, copy);
+                GraphUtils.TryAcceptAll(slot, copy);
                 produced++;
             }
 
@@ -252,6 +275,19 @@ namespace Probability
             SetProgress(machine, 0);
             SetStatus(status, MakeProgressText(0, modules, yield, drainPercent));
             ModEntry.Log.Log("assembler produced " + produced + " copy/copies of '" + identifier + "'.");
+        }
+
+        private static int CountFreeSlots(GameSlotInventory[] slots)
+        {
+            int free = 0;
+            foreach (GameSlotInventory slot in slots)
+            {
+                if (slot != null && slot.childItem == null)
+                {
+                    free++;
+                }
+            }
+            return free;
         }
 
         /// <summary>Energy to draw this turn: a share of the battery's maximum charge.</summary>
