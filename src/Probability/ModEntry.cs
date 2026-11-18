@@ -28,9 +28,11 @@ namespace Probability
             {
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: item category filter", FilterWindow.Toggle, tall: true);
                 ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 超级魅惑香水", CharmPerfumeDirectory.GiveToPlayer, tall: true);
-                
+                ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 存储终端", StorageTerminalDirectory.GiveMachine, tall: true);
+                ModHelper.AddDebugFunction(ModId, "Modding", "Probability: give 存储硬盘一套", StorageTerminalDirectory.GiveDriveSet, tall: true);
 
                 CharmPerfumeDirectory.EnsureRegistered();
+                StorageTerminalDirectory.EnsureRegistered();
                 AssemblerRitual.Subscribe();
 
                 if (hostObject != null)
@@ -41,7 +43,7 @@ namespace Probability
                 UnityEngine.Object.DontDestroyOnLoad(hostObject);
                 hostObject.AddComponent<HotkeyHost>();
 
-                Log.Log("enabled. F7 opens the category filter; the F9 Modding tab hands out the mod items.");
+                Log.Log("enabled. The negotiation tablet's Filter button opens the category filter; the F9 Modding tab hands out the mod items.");
             }
             catch (Exception e)
             {
@@ -74,10 +76,8 @@ namespace Probability
         /// <summary>Called every frame by <see cref="HotkeyHost"/>.</summary>
         internal static void Tick()
         {
-            if (Input.GetKeyDown(KeyCode.F7))
-            {
-                FilterWindow.Toggle();
-            }
+            // The negotiation tablet gets its own filter button once it exists.
+            TabletFilterEntry.Tick();
 
             MolecularAssembler.RuntimeTick();
 

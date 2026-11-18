@@ -3,6 +3,8 @@ ui_total,物品数
 ui_all,显示全部
 ui_empty,没有可见物品 - 请先打开背包或容器
 ui_close,关闭
+ui_entry_title,筛选
+ui_entry_tip,打开或关闭物品类别筛选面板
 cat_unclassified,未分类
 cat_access_card,门禁卡
 cat_alarm_module,警报模块
@@ -79,3 +81,38 @@ asm_drain_short,耗电
 asm_hint_printer,据说把它、一块未封顶的神经核心、6 个电子元件（超科技）、10 份打印塑料、10 个常用电子件和 5 根电线留在店里睡一觉……会有人替你组装出点什么。
 
 asm_no_space,输出空间不足
+
+storage_name,存储终端
+storage_flavor,十个硬盘位，一条很长的货架。
+storage_desc,条目式存储机。最多安装十块硬盘，容量为硬盘容量之和。把物品拖进存入槽即可入库；选中条目、选择数量后取出，物品优先进入背包，再进入前台柜台。带格子的非空容器不能存入；若取出硬盘后剩余容量小于当前已存件数，则不允许取出该硬盘。
+storage_drives,硬盘位
+storage_deposit,存入
+storage_list,存储
+storage_control,控制
+storage_hidden,存储
+storage_capacity,容量
+storage_quantity,数量
+storage_withdraw,取出
+storage_rule,带格子的非空容器不能存入。
+storage_cannot_store,该物品不能存入（非空格子容器或空间不足）。
+storage_stored,已存入。
+storage_store_partial,空间不足，部分物品仍留在存入槽。
+storage_store_failed,存入失败。
+storage_nothing_selected,请先选中一个条目。
+storage_no_space,背包和前台柜台都没有空间。
+storage_take_partial,背包/柜台已满，已尽可能取出： 
+storage_taken,已取出： 
+storage_search,搜索
+storage_search_title,搜索物品
+storage_search_hint,名称或 #标签
+storage_search_clear,清除
+storage_search_close,关闭
+storage_search_all,全部
+storage_search_failed,搜索窗口不可用。
+storage_drive_desc,存储终端使用的硬盘。容量：
+storage_drive_flavor,硬盘转起来，货架就出现了。
+storage_drive_mk1_name,存储硬盘 MK I
+storage_drive_mk2_name,存储硬盘 MK II
+storage_drive_mk3_name,存储硬盘 MK III
+storage_drive_mk4_name,存储硬盘 MK IV
+storage_drive_mk5_name,存储硬盘 MK V

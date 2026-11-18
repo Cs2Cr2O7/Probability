@@ -1,14 +1,19 @@
 # Probability — item category filter for Probably Stolen
 
 A mod for [Probably Stolen](https://store.steampowered.com/) that adds a category filter for
-items in the inventory and in open containers, plus one custom item: the **Super Charm Perfume**.
+items in the inventory and in open containers, plus custom items and machines: the **Super Charm
+Perfume**, the **Molecular Assembly Room** and the **Storage Terminal**.
 
 ## Item category filter
 
-Open the inventory or a container, press **F7** (or use the *Probability: item category filter*
-button in the F9 dev menu), pick a category — every item that does not carry that category is
-dimmed, the matching ones stay readable, so you can find "all the medical stuff" or "all the
-firearms" at a glance.
+Open the inventory or a container, then click the **Filter** button in the negotiation tablet's top
+bezel (or use the *Probability: item category filter* button in the F9 dev menu), pick a category —
+every item that does not carry that category is dimmed, the matching ones stay readable, so you can
+find "all the medical stuff" or "all the firearms" at a glance.
+
+The negotiation tablet is the screen you use while a customer is buying; its **Filter** button sits
+next to the resize/close icons, so the filter is one click away during a trade. It is the only
+in-game entry (the F7 hotkey was removed in 0.3.4.1); the F9 dev-menu button remains for debugging.
 
 ## Super Charm Perfume
 
@@ -39,6 +44,24 @@ hypertech electronics, ten printer plastic, ten common electronics and five wire
 go to sleep — in the morning the machine has assembled itself and the ingredients are consumed. The
 hint is written in the gray italic line of the printer tooltip.
 
+## Storage Terminal
+
+A list-based storage machine (存储终端). It has ten hard-drive bays; the five drive tiers currently
+hold 4 / 8 / 12 / 16 / 20 items each. Stored items live in a real hidden inventory, while the window
+shows one row per item identity and state (`toilet paper x2`), ten rows per page. Select a row, pick a
+quantity, and take the items out: the bag is filled first, then the player-side counter, taking as
+many as fit. Non-empty grid containers are refused, and a drive cannot be removed if the remaining
+capacity would be smaller than the stored item count. No battery and no filter integration.
+
+The control panel's **Search** button opens a search window. Plain text matches item names and
+identifiers (space-separated words are ANDed); a `#` prefix searches enabled tags, e.g.
+`#FOOD_TAG` or `#食物`. Chinese tag aliases cover the game's filter categories (food, weapons,
+materials, medical, containers, machinery, electronics, liquids, junk, documents, and so on).
+
+* The machine and drives are handed out through the F9 dev menu for now:
+  **F9 → Modding → Probability: give 存储终端 / give 存储硬盘一套**.
+* Both the basic flows and search were accepted in game on 2026-11-18.
+
 ## How it works
 
 * Categories come from the game's own taxonomy: `GameItem.itemTypes` (`FOOD`, `MEDICAL`,
@@ -56,7 +79,7 @@ hint is written in the gray italic line of the printer tooltip.
    `Probably Stolen\Mods\Probability\` containing `manifest.xml`, `Probability.dll`,
    `Localization\en.csv`, `Localization\zh.csv`.
 2. Start the game, open **Mods**, activate **Probability**, restart.
-3. Press `F7` in game.
+3. Open the negotiation tablet and click *Filter* in game.
 
 ## Build
 
@@ -82,7 +105,7 @@ post-build copy step; each project only declares its assembly references.
 
 | Path | Contents |
 |---|---|
-| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `Labels.cs`, `CharmPerfume.cs`, `CharmEffect.cs`, `CharmPatches.cs`, `MolecularAssembler.cs`, `manifest.xml`, `Localization\`) |
+| `src\Probability\` | the mod (`ModEntry.cs`, `ItemFilter.cs`, `FilterWindow.cs`, `TabletFilterEntry.cs`, `Labels.cs`, `CharmPerfume.cs`, `CharmEffect.cs`, `CharmPatches.cs`, `MolecularAssembler.cs`, `StorageTerminal.cs`, `StorageTerminalDirectory.cs`, `manifest.xml`, `Localization\`) |
 | `src\Directory.Build.props` | shared build settings + install-to-Mods step |
 
 Maintenance notes (feature acceptance, architecture, decisions, history) are kept in the local
@@ -90,9 +113,11 @@ workspace and are not published in this repository.
 
 ## Status
 
-Current version: **0.3.3.1**. Compiles against game version 1.0.0.x; the filter is verified in a
-running game. The charm perfume and the molecular assembly room are implemented but have not been
-verified in a live save yet.
+Current version: **0.3.5.0**. Compiles against game version 1.0.0.x; the filter (with its
+negotiation-tablet button), the charm perfume, the molecular assembly room and the storage terminal
+are verified in a running game. The F7 hotkey was removed in 0.3.4.1 (per user request); the tablet
+button is the only in-game entry. The storage terminal's list/deposit/withdraw flows, capacity-gated
+direct drag and name/tag search (including Chinese tag aliases) are accepted.
 
 ## Credits
 

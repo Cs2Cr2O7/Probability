@@ -3,6 +3,8 @@ ui_total,Items in view
 ui_all,Show all
 ui_empty,No items in view - open the inventory or a container first
 ui_close,Close
+ui_entry_title,Filter
+ui_entry_tip,Open or close the item category filter
 cat_unclassified,Unclassified
 cat_access_card,Access Card
 cat_alarm_module,Alarm Module
@@ -79,3 +81,38 @@ asm_drain_short,Drain
 asm_hint_printer,Rumor: leave this printer, an uncapped neural core, 6 hypertech electronics, 10 printer plastic, 10 common electronics and 5 wire in the store overnight...
 
 asm_no_space,Not enough output space
+
+storage_name,Storage Terminal
+storage_flavor,Ten drive bays and one very long shelf.
+storage_desc,A list-based storage machine. Install up to ten hard drives; capacity is the sum of their item capacities. Drag items into the deposit slot to store them. Select a row and choose how many to take. The items go to your bag first then the front counter. Non-empty grid containers cannot be stored. A drive cannot be removed if the remaining capacity would be smaller than the stored item count.
+storage_drives,Drives
+storage_deposit,Deposit
+storage_list,Storage
+storage_control,Control
+storage_hidden,Storage
+storage_capacity,Capacity
+storage_quantity,Quantity
+storage_withdraw,Take out
+storage_rule,Non-empty grid containers cannot be stored.
+storage_cannot_store,That item cannot be stored (non-empty grid container or no room).
+storage_stored,Stored.
+storage_store_partial,Not enough room; some items remain in the deposit slot.
+storage_store_failed,Could not store that item.
+storage_nothing_selected,Select an entry first.
+storage_no_space,No room in the bag or the front counter.
+storage_take_partial,Bag/counter full; took as many as would fit: 
+storage_taken,Taken: 
+storage_search,Search
+storage_search_title,Search items
+storage_search_hint,Name or #tag
+storage_search_clear,Clear
+storage_search_close,Close
+storage_search_all,All
+storage_search_failed,Search window is unavailable.
+storage_drive_desc,A storage drive for the storage terminal. Capacity: 
+storage_drive_flavor,Spin-up whine then the shelves appear.
+storage_drive_mk1_name,Storage Drive MK I
+storage_drive_mk2_name,Storage Drive MK II
+storage_drive_mk3_name,Storage Drive MK III
+storage_drive_mk4_name,Storage Drive MK IV
+storage_drive_mk5_name,Storage Drive MK V
